@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build and analyze
+    name: Build and Analyze
     runs-on: windows-latest
 
     steps:
@@ -20,26 +20,24 @@ jobs:
           java-version: 17
           distribution: 'zulu'
 
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Полный клон для корректного анализа
+          fetch-depth: 0  # Full clone for proper analysis
 
-      - name: Setup MSBuild 17
+      - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.3.1
 
-      - name: Install SonarQube Cloud scanner
-        shell: powershell
-        run: dotnet tool update --global dotnet-sonarscanner
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install --global dotnet-sonarscanner
 
-      - name: Restore dependencies
+      - name: Restore Dependencies
         run: dotnet restore
 
-      - name: Build and analyze
+      - name: Build and Analyze with SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"virawhy_swqt_mkr_1" /o:"test-organization-01" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          dotnet-sonarscanner begin /k:"virawhy_swqt_mkr_1" /o:"test-organization-01" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet build
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
